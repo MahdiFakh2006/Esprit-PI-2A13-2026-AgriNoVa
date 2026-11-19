@@ -55,7 +55,7 @@ Chaque module dispose d’un **Front Office** (utilisateurs) et d’un **Back Of
 
 #### Module 1 – Utilisateurs
 
-**Responsable :** [Étudiant 1](https://github.com/utilisateur1) (chef de projet)
+**Responsable :** [Mohamed MOALLA](https://github.com/MedMoalla) (chef de projet)
 
 **Objectif :** gérer les comptes, les rôles et la sécurité de toute la plateforme. Tous les autres modules s’appuient
 sur ce module, car chaque action demande d’être connecté avec le bon rôle.
@@ -111,7 +111,7 @@ views/admin_space.php, views/admin_users.php, views/admin_user_form.php
 ```
 #### Module 2 – Marketplace
 
-**Responsable :** [Étudiant 2](https://github.com/utilisateur2)
+**Responsable :** [Eya Hammami](https://github.com/eya617)
 
 **Objectif :** rendre le matériel agricole intelligent accessible depuis une seule plateforme : capteurs, drones,
 stations météo et kits IA, vendus par des vendeurs vérifiés.
@@ -169,7 +169,7 @@ views/admin_categories.php, views/admin_produits.php, views/admin_produit_form.p
 
 #### Module 3 – Diagnostic IA
 
-**Responsable :** [Étudiant 3](https://github.com/utilisateur3)
+**Responsable :** [Mohamed MOALLAbebel](https://github.com/MedMoalla)
 
 **Objectif :** aider l’agriculteur à détecter tôt une maladie à partir de la photo d’une feuille, et lui proposer un traitement.
 Le résultat est indicatif et ne remplace pas l’avis d’un agronome.
@@ -226,7 +226,7 @@ views/admin_maladies.php, views/admin_maladie_form.php, views/admin_analyses.php
 
 #### Module 4 – Location d’équipements
 
-**Responsable :** [Étudiant 4](https://github.com/utilisateur4)
+**Responsable :** [Mahdi Dhaouadi](https://github.com/MahdiDhaouadi)
 
 **Objectif :** permettre aux petites exploitations d’utiliser du matériel coûteux (drones, stations…) quelques jours
 au lieu de l’acheter, ce qui réduit les coûts et le gaspillage de ressources.
@@ -284,7 +284,7 @@ views/admin_equipements.php, views/admin_equipement_form.php, views/admin_reserv
 
 #### Module 5 – Réclamations et support
 
-**Responsable :** [Étudiant 5](https://github.com/utilisateur5)
+**Responsable :** [Tasnim Trimich](https://github.com/tassnim557)
 
 **Objectif :** accompagner l’utilisateur après un achat, une location, un diagnostic, une formation ou un parrainage,
 avec un suivi clair de chaque réclamation.
@@ -341,7 +341,7 @@ views/admin_reclamations.php, views/admin_reclamation_detail.php
 
 #### Module 6 – Formations agricoles
 
-**Responsable :** [Étudiant 6](https://github.com/utilisateur6)
+**Responsable :** [Mahdi FakhFakh](https://github.com/MahdiFakh2006)
 
 **Objectif :** permettre aux agriculteurs d’apprendre à utiliser le matériel intelligent (capteurs, drones, IA)
 et à mieux gérer l’eau, grâce à des formations proposées par les vendeurs et validées par l’administrateur.
@@ -400,7 +400,7 @@ views/admin_formations.php, views/admin_formation_form.php
 
 #### Module 7 – Adopte un olivier
 
-**Responsable :** [Étudiant 7](https://github.com/utilisateur7)
+**Responsable :** [Amine Kochbati](https://github.com/mnkchbt-spec)
 
 **Objectif :** des citoyens, en Tunisie ou à l’étranger, parrainent un olivier chez un agriculteur pour une saison.
 L’agriculteur obtient un revenu stable pour cultiver de façon durable ; le parrain suit son arbre et reçoit une part de la récolte.
