@@ -9,6 +9,23 @@ Projet réalisé dans le cadre du module **Projet Technologies Web 2A** (Esprit 
 ---
 Problème résolu : ces services sont aujourd’hui dispersés (vente de matériel d’un côté, conseils agronomiques de l’autre), et le matériel intelligent reste trop cher à l’achat pour beaucoup d’exploitations. AgriNoVa les réunit dans une seule plateforme.
 
+
+
+## Table des matières
+ * Overview
+ * Features
+ * Tech Stack
+ * Architecture
+ * Security
+ * Contributors
+ * Academic Context
+ * Getting Started
+ * Acknowledgments
+ * License
+
+
+
+
 ## Équipe et modules
 
 | Module | Fonctionnalité | Entités (jointure) | Responsable |
