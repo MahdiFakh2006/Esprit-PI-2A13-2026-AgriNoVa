@@ -1,0 +1,12 @@
+# Fichiers d'éditeurs et du système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Fichiers déposés par les utilisateurs (images de produits, analyses IA…)
+uploads/*
+!uploads/.gitkeep
+
+# Journaux
+*.log
