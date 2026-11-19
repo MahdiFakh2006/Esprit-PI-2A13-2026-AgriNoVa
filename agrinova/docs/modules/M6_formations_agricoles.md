@@ -2,7 +2,7 @@
 
 > Projet **AgriNoVa** – Projet Technologies Web 2A – **Esprit School of Engineering** (2026–2027)
 
-**Responsable :** [Étudiant 6](https://github.com/utilisateur6)
+**Responsable :** [Mahdi FakhFakh](https://github.com/MahdiFakh2006)
 **Branche Git :** `module6-formations`
 
 ## Table des matières
