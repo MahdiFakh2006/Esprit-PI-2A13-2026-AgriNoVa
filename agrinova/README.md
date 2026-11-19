@@ -7,6 +7,7 @@ formations, support client et parrainage d’oliviers (« Adopte un olivier »).
 Projet réalisé dans le cadre du module **Projet Technologies Web 2A** (Esprit — UP WEB, 2026-2027).
 
 ---
+Problème résolu : ces services sont aujourd’hui dispersés (vente de matériel d’un côté, conseils agronomiques de l’autre), et le matériel intelligent reste trop cher à l’achat pour beaucoup d’exploitations. AgriNoVa les réunit dans une seule plateforme.
 
 ## Équipe et modules
 
