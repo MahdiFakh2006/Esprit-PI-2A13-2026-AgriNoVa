@@ -12,16 +12,16 @@ Problème résolu : ces services sont aujourd’hui dispersés (vente de matéri
 
 
 ## Table des matières
- * Overview
- * Features
- * Tech Stack
- * Architecture
- * Security
- * Contributors
- * Academic Context
- * Getting Started
- * Acknowledgments
- * License
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Security](#security)
+- [Contributors](#contributors)
+- [Academic Context](#academic-context)
+- [Getting Started](#getting-started)
+- [Acknowledgments](#acknowledgments)
+- [License](#license)
 
 
 
