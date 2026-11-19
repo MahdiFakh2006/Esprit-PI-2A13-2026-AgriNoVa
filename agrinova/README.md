@@ -26,17 +26,46 @@ Problème résolu : ces services sont aujourd’hui dispersés (vente de matéri
 
 
 
-## Équipe et modules
+## Features
 
-| Module | Fonctionnalité | Entités (jointure) | Responsable |
-|---|---|---|---|
-| M1 | Gestion des utilisateurs, rôles, sécurité | Role ↔ Utilisateur | [Étudiant 1] |
-| M2 | Marketplace | Categorie ↔ Produit | [Étudiant 2] |
-| M3 | Diagnostic IA | Maladie ↔ Analyse | [Étudiant 3] |
-| M4 | Location d’équipements | Equipement ↔ Reservation | [Étudiant 4] |
-| M5 | Réclamations et support | Reclamation ↔ Reponse | [Étudiant 5] |
-| M6 | Formations agricoles | Formation ↔ Inscription | [Étudiant 6] |
-| M7 | Adopte un olivier | Arbre ↔ Parrainage | [Étudiant 7] |
+| Module | Fonctionnalités | Entités (jointure) |
+|---|---|---|
+| **M1 – Utilisateurs** | Inscription par rôle (agriculteur, vendeur, parrain), connexion sécurisée, profil, Back Office : CRUD des comptes, rôles, blocage, statistiques | Role ↔ Utilisateur |
+| **M2 – Marketplace** | Catalogue de capteurs, drones, stations météo et kits IA ; gestion des produits par les vendeurs | Categorie ↔ Produit |
+| **M3 – Diagnostic IA** | Analyse de la photo d’une feuille, maladie détectée et traitement conseillé, historique | Maladie ↔ Analyse |
+| **M4 – Location d’équipements** | Réservation de matériel coûteux pour quelques jours au lieu de l’acheter | Equipement ↔ Reservation |
+| **M5 – Réclamations et support** | Dépôt et suivi des réclamations, fil de réponses | Reclamation ↔ Reponse |
+| **M6 – Formations agricoles** | Calendrier des formations (irrigation, drones, IA, bio), inscriptions | Formation ↔ Inscription |
+| **M7 – Adopte un olivier** | Des citoyens parrainent un olivier et assurent un revenu stable à l’agriculteur | Arbre ↔ Parrainage |
+
+Chaque module dispose d’un **Front Office** (utilisateurs) et d’un **Back Office** (administration).
+
+### Détail des modules
+
+- [Module 1 – Utilisateurs](#module-1--utilisateurs)
+- [Module 2 – Marketplace](#module-2--marketplace)
+- [Module 3 – Diagnostic IA](#module-3--diagnostic-ia)
+- [Module 4 – Location d’équipements](#module-4--location-déquipements)
+- [Module 5 – Réclamations et support](#module-5--réclamations-et-support)
+- [Module 6 – Formations agricoles](#module-6--formations-agricoles)
+- [Module 7 – Adopte un olivier](#module-7--adopte-un-olivier)
+
+---
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## Fonctionnalités déjà intégrées (module 1)
 
