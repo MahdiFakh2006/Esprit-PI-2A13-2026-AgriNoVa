@@ -38,3 +38,35 @@ function roleLabel(string $role): string
         'parrain'     => 'Parrain',
     ][$role] ?? ucfirst($role);
 }
+
+// ---------------------------------------------------------------------
+// MODULE 2 : Marketplace
+// ---------------------------------------------------------------------
+
+/** Montant en dinars : 1 250,50 DT */
+function money(float|int|string $value): string
+{
+    return number_format((float) $value, 2, ',', ' ') . ' DT';
+}
+
+/** Adresse (relative) de l'image d'un produit, ou chaîne vide s'il n'y en a pas. */
+function produitImageUrl(string $image): string
+{
+    return $image === '' ? '' : 'uploads/produits/' . rawurlencode(basename($image));
+}
+
+/** Libellé lisible du statut d'une commande. */
+function commandeStatutLabel(string $statut): string
+{
+    return [
+        'en_attente' => 'En attente',
+        'confirmee'  => 'Confirmée',
+        'annulee'    => 'Annulée',
+    ][$statut] ?? ucfirst($statut);
+}
+
+/** Longueur d'un texte en caractères (accents compris), même si l'extension mbstring est désactivée. */
+function textLength(string $value): int
+{
+    return function_exists('mb_strlen') ? mb_strlen($value) : (int) preg_match_all('/./us', $value);
+}

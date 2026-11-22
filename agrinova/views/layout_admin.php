@@ -7,7 +7,7 @@ $flashes = AuthController::takeFlashes();
 $active = $active ?? '';
 // Menus des autres modules : chaque membre remplace « # » par son action quand son module est intégré
 $modules = [
-    ['M2', 'Produits', '#'], ['M3', 'Analyses IA', '#'], ['M4', 'Locations', '#'],
+    ['M3', 'Analyses IA', '#'], ['M4', 'Locations', '#'],
     ['M5', 'Réclamations', '#'], ['M6', 'Formations', '#'], ['M7', 'Parrainages', '#'],
 ];
 ?>
@@ -29,6 +29,10 @@ $modules = [
         <a class="<?= $active === 'dashboard' ? 'active' : '' ?>" href="index.php?action=admin">Tableau de bord</a>
         <a class="<?= $active === 'users' ? 'active' : '' ?>" href="index.php?action=admin_users">Utilisateurs</a>
         <a class="<?= $active === 'profile' ? 'active' : '' ?>" href="index.php?action=profile">Mon profil</a>
+        <p class="sidenav-title">Module 2 · Marketplace</p>
+        <a class="<?= $active === 'categories' ? 'active' : '' ?>" href="index.php?action=admin_categories">Catégories</a>
+        <a class="<?= $active === 'produits' ? 'active' : '' ?>" href="index.php?action=admin_produits">Produits</a>
+        <a class="<?= $active === 'commandes' ? 'active' : '' ?>" href="index.php?action=admin_commandes">Commandes</a>
         <p class="sidenav-title">Autres modules</p>
         <?php foreach ($modules as [$code, $label, $href]): ?>
             <a class="<?= $href === '#' ? 'soon' : '' ?>" href="<?= e($href) ?>"><?= e($code) ?> · <?= e($label) ?></a>

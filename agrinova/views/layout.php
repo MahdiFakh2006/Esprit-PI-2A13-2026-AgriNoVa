@@ -20,6 +20,14 @@ $flashes = AuthController::takeFlashes();
     <nav class="topnav">
         <?php if (AuthController::isAuthenticated()): ?>
             <a href="index.php?action=dashboard">Mon espace</a>
+            <?php if (AuthController::hasRole('agriculteur')): ?>
+                <a href="index.php?action=catalogue">Catalogue</a>
+                <a href="index.php?action=panier">Panier (<?= e(CommandeController::cartCount()) ?>)</a>
+                <a href="index.php?action=mes_commandes">Mes commandes</a>
+            <?php elseif (AuthController::hasRole('vendeur')): ?>
+                <a href="index.php?action=catalogue">Catalogue</a>
+                <a href="index.php?action=mes_produits">Mes produits</a>
+            <?php endif; ?>
             <a href="index.php?action=profile">Mon profil</a>
             <span class="who"><?= e($_SESSION['user_name'] ?? '') ?> · <?= e(roleLabel(AuthController::currentRole() ?? '')) ?></span>
             <form method="post" action="index.php?action=logout" class="inline">

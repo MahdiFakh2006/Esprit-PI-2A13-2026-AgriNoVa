@@ -7,7 +7,9 @@ $title = 'Mon espace';
 // Raccourcis vers les modules selon le rôle (chaque membre branchera son action ici)
 $shortcuts = [
     'agriculteur' => [
-        ['M2', 'Catalogue', 'Acheter capteurs, drones et kits IA.'],
+        ['M2', 'Catalogue', 'Acheter capteurs, drones et kits IA.', 'catalogue'],
+        ['M2', 'Mon panier', 'Voir mon panier et valider ma commande.', 'panier'],
+        ['M2', 'Mes commandes', 'Suivre mes achats.', 'mes_commandes'],
         ['M3', 'Diagnostic IA', 'Envoyer la photo d’une feuille malade.'],
         ['M4', 'Location', 'Réserver un équipement pour quelques jours.'],
         ['M6', 'Formations', 'S’inscrire à une formation.'],
@@ -15,7 +17,8 @@ $shortcuts = [
         ['M5', 'Support', 'Déposer une réclamation.'],
     ],
     'vendeur' => [
-        ['M2', 'Mes produits', 'Ajouter et gérer mes produits.'],
+        ['M2', 'Mes produits', 'Ajouter et gérer mes produits.', 'mes_produits'],
+        ['M2', 'Catalogue', 'Voir tous les produits de la plateforme.', 'catalogue'],
         ['M4', 'Mes locations', 'Gérer le matériel mis en location.'],
         ['M6', 'Mes formations', 'Proposer une formation.'],
         ['M5', 'Support', 'Répondre aux réclamations.'],
@@ -35,13 +38,24 @@ ob_start();
 </section>
 
 <section class="cards">
-    <?php foreach ($shortcuts as [$code, $label, $desc]): ?>
-        <article class="card card-soon">
-            <span class="card-code"><?= e($code) ?></span>
-            <h3><?= e($label) ?></h3>
-            <p><?= e($desc) ?></p>
-            <small>Bientôt disponible</small>
-        </article>
+    <?php foreach ($shortcuts as $sc):
+        [$code, $label, $desc] = $sc;
+        $target = $sc[3] ?? null; ?>
+        <?php if (!empty($target)): ?>
+            <a class="card card-link" href="index.php?action=<?= e($target) ?>">
+                <span class="card-code"><?= e($code) ?></span>
+                <h3><?= e($label) ?></h3>
+                <p><?= e($desc) ?></p>
+                <small>Ouvrir →</small>
+            </a>
+        <?php else: ?>
+            <article class="card card-soon">
+                <span class="card-code"><?= e($code) ?></span>
+                <h3><?= e($label) ?></h3>
+                <p><?= e($desc) ?></p>
+                <small>Bientôt disponible</small>
+            </article>
+        <?php endif; ?>
     <?php endforeach; ?>
 </section>
 
