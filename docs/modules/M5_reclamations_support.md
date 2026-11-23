@@ -1,235 +1,92 @@
-Module 5 – Réclamations et Support
-
-Projet AgriNoVa – Projet Technologies Web 2A – Esprit School of Engineering (2026–2027)
-
+RÉCLAMATIONS ET SUPPORT
+Projet AgriNoVa – Projet Technologies Web 2A
+Esprit School of Engineering | 2026–2027
 Responsable : Tasnim Trimich
-Branche Git : feature/module5-reclamations
-
-Table des matières
-
-1. Objectif
+1. Présentation et objectif
+Le module Réclamations et support permet d’accompagner les utilisateurs d’AgriNoVa après une interaction avec la plateforme : achat, location, diagnostic, formation ou parrainage. Il leur offre un moyen de déposer une réclamation, de consulter son état d’avancement et de suivre les réponses échangées avec l’administration.
 2. Entités et relations
-3. Fonctionnement du module
-4. Requêtes SQL principales
-5. Fonctionnalités
-6. Règles métier et contrôles de saisie
-7. Sécurité et rôles
-8. Fichiers du module
-9. Scénarios de test
-10. Captures d’écran
+Le module repose sur deux entités principales : Reclamation et Reponse.
+Entité	Attribut	Type / relation	Description
+Reclamation	id_reclamation	INT, PK	Identifiant unique de la réclamation.
+Reclamation	id_utilisateur	INT, FK → utilisateur	Utilisateur ayant déposé la réclamation.
+Reclamation	sujet	VARCHAR	Sujet de la réclamation.
+Reclamation	categorie	VARCHAR / catégorie	Domaine concerné : commande, location, diagnostic, formation ou parrainage.
+Reclamation	description	TEXT	Détails du problème ou de la demande.
+Reclamation	date_creation	DATETIME	Date de création de la réclamation.
+Reclamation	statut	Statut	État actuel de traitement de la réclamation.
+Reponse	id_reponse	INT, PK	Identifiant unique de la réponse.
+Reponse	id_reclamation	INT, FK → reclamation	Réclamation à laquelle la réponse est associée.
+Reponse	id_auteur	INT, FK → utilisateur	Utilisateur ayant rédigé la réponse.
+Reponse	message	TEXT	Contenu de la réponse.
+Reponse	date_reponse	DATETIME	Date d’envoi de la réponse.
 
-⸻
-
-1. Objectif
-
-Le module Réclamations et Support permet d’accompagner les utilisateurs d’AgriNoVa après une interaction avec la plateforme : achat, location, diagnostic, formation ou parrainage.
-
-Il permet de déposer une réclamation, de suivre son évolution et de consulter les réponses de l’administration.
-
-L’objectif principal est d’assurer un suivi clair et organisé de chaque réclamation et d’améliorer la communication entre les utilisateurs et l’équipe administrative.
-
-2. Entités et relations
-
-Entité : Reclamation
-
-Attribut	Type	Description
-id_reclamation	INT, PK	Identifiant de la réclamation
-id_utilisateur	INT, FK → utilisateur	Utilisateur ayant déposé la réclamation
-sujet	VARCHAR	Sujet de la réclamation
-categorie	VARCHAR	Catégorie de la réclamation
-description	TEXT	Description détaillée du problème
-date_creation	DATETIME	Date de création
-statut	ENUM	État actuel de la réclamation
-
-Entité : Reponse
-
-Attribut	Type	Description
-id_reponse	INT, PK	Identifiant de la réponse
-id_reclamation	INT, FK → reclamation	Réclamation concernée
-id_auteur	INT, FK → utilisateur	Auteur de la réponse
-message	TEXT	Contenu de la réponse
-date_reponse	DATETIME	Date de la réponse
-
-Relation :
-
-Une réclamation peut contenir plusieurs réponses.
-
-Reclamation (1) — 👎 Reponse.
-
-La clé étrangère id_reclamation permet de relier chaque réponse à sa réclamation correspondante.
-
-3. Fonctionnement du module
-
-Le fonctionnement du module se déroule en plusieurs étapes :
-
-1. L’utilisateur accède au formulaire de réclamation.
-2. Il choisit la catégorie concernée :
-    * Commande
-    * Location
-    * Diagnostic
-    * Formation
-    * Parrainage
-3. Il saisit le sujet et décrit son problème.
-4. Il soumet sa réclamation.
-5. La réclamation est enregistrée avec un statut initial.
-6. L’administrateur consulte les réclamations reçues.
-7. L’administrateur peut répondre à l’utilisateur et modifier le statut.
-8. L’utilisateur consulte sa réclamation et suit les réponses depuis son espace personnel.
-
-4. Requêtes SQL principales
-
-Jointure : réclamations ouvertes et nombre de réponses
-
+Relation entre les entités
+Une réclamation peut contenir plusieurs réponses, tandis qu’une réponse appartient à une seule réclamation. La relation est donc de type 1 — N : Reclamation (1) → Reponse (N), assurée par la clé étrangère id_reclamation.
+3. Fonctionnement général
+1.	L’utilisateur ouvre le formulaire de réclamation et choisit une catégorie.
+2.	Il saisit le sujet et décrit le problème, puis envoie le formulaire.
+3.	La réclamation est enregistrée avec sa date de création et un statut initial.
+4.	L’utilisateur consulte la page « Mes réclamations » pour suivre le statut et les réponses.
+5.	L’administrateur consulte les réclamations, répond à l’utilisateur et met à jour le statut selon l’avancement du traitement.
+6.	La FAQ permet également à l’utilisateur de consulter les réponses aux questions fréquentes.
+4. Requête SQL principale
+Cette requête affiche les réclamations qui ne sont pas encore clôturées ainsi que le nombre de réponses associées.
 SELECT r.sujet, r.statut, COUNT(p.id_reponse) AS nb_rep
 FROM reclamation r
 LEFT JOIN reponse p ON p.id_reclamation = r.id_reclamation
 WHERE r.statut <> 'cloturee'
 GROUP BY r.id_reclamation;
-
-Cette requête permet d’afficher les réclamations qui ne sont pas clôturées ainsi que le nombre de réponses associées à chacune.
-
-La jointure LEFT JOIN permet de conserver les réclamations même lorsqu’elles ne possèdent aucune réponse.
-
 5. Fonctionnalités
-
 Front Office
-
-Fonctionnalité	Rôle
-Formulaire de dépôt d’une réclamation par catégorie	Agriculteur, vendeur, parrain
-Consultation de la page « Mes réclamations »	Agriculteur, vendeur, parrain
-Suivi du statut de chaque réclamation	Agriculteur, vendeur, parrain
-Consultation du fil des réponses	Agriculteur, vendeur, parrain
-Consultation de la FAQ	Utilisateurs
+Fonctionnalité	Description
+Formulaire de réclamation	Permet de déposer une réclamation et de sélectionner une catégorie : commande, location, diagnostic, formation ou parrainage.
+Mes réclamations	Affiche les réclamations de l’utilisateur, leur statut et le fil des réponses.
+Détail d’une réclamation	Permet de consulter les informations et les échanges liés à une réclamation.
+FAQ	Présente les réponses aux questions fréquentes.
 
 Back Office
-
-Fonctionnalité	Rôle
-Consultation de la liste des réclamations	Admin
-Filtrage par statut et catégorie	Admin
-Réponse aux réclamations	Admin
-Modification du statut	Admin
-Consultation des statistiques	Admin
-Calcul du délai moyen de réponse	Admin
-Statistiques des réclamations par catégorie	Admin
+Fonctionnalité	Description
+Liste des réclamations	Affiche les réclamations et permet de les filtrer par statut et par catégorie.
+Réponse au client	Permet à l’administrateur d’envoyer une réponse liée à une réclamation.
+Gestion du statut	Permet de faire évoluer le statut d’une réclamation selon son traitement.
+Statistiques	Prévoit le suivi du délai moyen de réponse et du nombre de réclamations par catégorie.
 
 6. Règles métier et contrôles de saisie
+Élément	Règle
+Sujet	Obligatoire ; entre 5 et 150 caractères.
+Description	Obligatoire ; 20 caractères minimum.
+Catégorie	Obligatoire.
+Statuts	Cycle de traitement : ouverte → en cours → résolue → clôturée.
+Confidentialité	Un utilisateur ne peut consulter que ses propres réclamations.
 
-Catégories disponibles
-
-* Commande
-* Location
-* Diagnostic
-* Formation
-* Parrainage
-
-Gestion des statuts
-
-Une réclamation suit le cycle de vie suivant :
-
-ouverte → en cours → résolue → clôturée
-
-Validation des champs
-
-Champ	Règle de validation
-Sujet	Obligatoire, entre 5 et 150 caractères
-Description	Obligatoire, minimum 20 caractères
-Catégorie	Obligatoire, choix parmi les catégories disponibles
-
-Ces règles permettent de garantir que les réclamations contiennent les informations nécessaires à leur traitement.
-
-7. Sécurité et rôles
-
-L’accès aux fonctionnalités dépend du rôle de l’utilisateur.
-
-Front Office
-
-Les rôles suivants peuvent déposer et suivre leurs propres réclamations :
-
-* Agriculteur
-* Vendeur
-* Parrain
-
-Chaque utilisateur ne peut consulter que ses propres réclamations.
-
-Back Office
-
-L’administrateur dispose des droits suivants :
-
-* Consulter toutes les réclamations.
-* Répondre aux utilisateurs.
-* Modifier le statut des réclamations.
-* Consulter les statistiques.
+7. Accès selon les rôles
+Action	Rôle autorisé
+Déposer une réclamation	Agriculteur, vendeur, parrain
+Consulter et suivre ses réclamations	Agriculteur, vendeur, parrain
+Répondre à une réclamation	Administrateur
+Modifier le statut d’une réclamation	Administrateur
+Consulter les statistiques	Administrateur
 
 8. Fichiers du module
-
-Models
-
-models/
-├── ReclamationModel.php
-└── ReponseModel.php
-
-* ReclamationModel.php : gestion des données des réclamations.
-* ReponseModel.php : gestion des réponses associées aux réclamations.
-
-Controllers
-
-controllers/
-├── ReclamationController.php
-└── ReponseController.php
-
-* ReclamationController.php : gestion des réclamations côté utilisateur et administration.
-* ReponseController.php : gestion des réponses aux réclamations.
-
-Views
-
-views/
-├── reclamation_form.php
-├── mes_reclamations.php
-├── reclamation_detail.php
-├── faq.php
-├── admin_reclamations.php
-├── admin_reclamation_detail.php
-└── admin_reponse_form.php
-
-* reclamation_form.php : formulaire de dépôt d’une réclamation.
-* mes_reclamations.php : historique des réclamations de l’utilisateur.
-* reclamation_detail.php : détails d’une réclamation et ses réponses.
-* faq.php : questions fréquentes.
-* admin_reclamations.php : interface de gestion des réclamations.
-* admin_reclamation_detail.php : détails d’une réclamation côté administration.
-* admin_reponse_form.php : formulaire de réponse de l’administrateur.
-
-Database
-
-database/
-└── m5_donnees_test.sql
-
-Ce fichier contient les données de test du module.
+Dossier / fichier	Rôle
+models/ReclamationModel.php	Gestion des données liées aux réclamations.
+models/ReponseModel.php	Gestion des données liées aux réponses.
+controllers/ReclamationController.php	Traitement des actions relatives aux réclamations.
+controllers/ReponseController.php	Traitement des réponses aux réclamations.
+views/reclamation_form.php	Formulaire de dépôt d’une réclamation.
+views/mes_reclamations.php	Liste des réclamations de l’utilisateur.
+views/reclamation_detail.php	Détail d’une réclamation et suivi des réponses.
+views/admin_reclamations.php	Interface d’administration des réclamations.
+views/admin_reclamation_detail.php	Détail d’une réclamation côté administration.
 
 9. Scénarios de test
+N°	Scénario	Résultat attendu
+1	Un utilisateur dépose une réclamation avec une catégorie, un sujet et une description valides.	La réclamation est enregistrée et apparaît dans « Mes réclamations ».
+2	L’utilisateur tente d’envoyer un sujet de moins de 5 caractères.	La saisie est refusée.
+3	L’utilisateur envoie une description de moins de 20 caractères.	La saisie est refusée.
+4	Un utilisateur consulte ses réclamations.	Seules ses propres réclamations sont affichées.
+5	L’administrateur ouvre une réclamation et envoie une réponse.	La réponse est associée à la bonne réclamation.
+6	L’administrateur modifie le statut d’une réclamation.	Le nouveau statut est affiché dans le suivi.
 
-#	Scénario	Résultat attendu
-1	Un agriculteur dépose une réclamation concernant une commande	La réclamation est enregistrée
-2	Un utilisateur soumet un formulaire sans sujet	La validation refuse le formulaire
-3	Un utilisateur saisit une description de moins de 20 caractères	La validation refuse le formulaire
-4	Un utilisateur ne sélectionne aucune catégorie	Un message de validation est affiché
-5	Un utilisateur consulte « Mes réclamations »	Seules ses propres réclamations sont affichées
-6	Un administrateur répond à une réclamation	La réponse est associée à la réclamation
-7	Un administrateur modifie le statut	Le nouveau statut est enregistré
-8	Un administrateur consulte les statistiques	Les statistiques des réclamations sont affichées
-
-10. Captures d’écran
-
-Front Office
-
-* Formulaire de dépôt d’une réclamation.
-* Page « Mes réclamations ».
-* Détails d’une réclamation et fil des réponses.
-* FAQ.
-
-Back Office
-
-* Liste des réclamations.
-* Détails d’une réclamation.
-* Formulaire de réponse.
-* Statistiques des réclamations.
+10. Conclusion
+Le module Réclamations et support centralise les demandes des utilisateurs et facilite leur suivi. La séparation entre l’espace utilisateur et l’espace administrateur permet de structurer le traitement des réclamations et de conserver l’historique des échanges.
