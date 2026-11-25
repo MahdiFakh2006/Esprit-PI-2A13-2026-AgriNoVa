@@ -38,3 +38,10 @@ function roleLabel(string $role): string
         'parrain'     => 'Parrain',
     ][$role] ?? ucfirst($role);
 }
+
+/** Masque une adresse e-mail pour l'affichage : karim@agrinova.tn → ka***@agrinova.tn */
+function maskEmail(string $email): string
+{
+    [$name, $domain] = array_pad(explode('@', $email, 2), 2, '');
+    return e(mb_substr($name, 0, 2) . str_repeat('*', max(1, mb_strlen($name) - 2)) . '@' . $domain);
+}

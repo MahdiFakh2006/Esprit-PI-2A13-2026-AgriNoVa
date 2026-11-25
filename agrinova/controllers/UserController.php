@@ -147,6 +147,7 @@ class UserController
         $user->setMotDePasse(password_hash($password, PASSWORD_DEFAULT));
         $user->setIdRole((int) $this->auth->findRoleId($role));
         $user->setStatut($statut);
+        $user->setEmailVerifie(true); // compte créé par l'administrateur : pas de vérification par e-mail
         $this->auth->insertUser($user);
         return [];
     }

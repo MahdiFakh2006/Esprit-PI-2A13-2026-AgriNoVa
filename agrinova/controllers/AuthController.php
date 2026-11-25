@@ -8,6 +8,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../models/UserModel.php';
 require_once __DIR__ . '/../models/RoleModel.php';
 require_once __DIR__ . '/Validator.php';
+require_once __DIR__ . '/Mailer.php';
 
 class AuthController
 {
@@ -20,6 +21,11 @@ class AuthController
     /** Anti force brute : nombre d'échecs autorisés et durée du blocage (secondes). */
     private const MAX_ATTEMPTS = 5;
     private const LOCK_SECONDS = 300;
+
+    /** Vérification de l'e-mail : durée de validité du code, essais autorisés, délai entre deux envois. */
+    public const CODE_MINUTES = 15;
+    private const CODE_MAX_ATTEMPTS = 5;
+    private const CODE_RESEND_SECONDS = 60;
 
     private PDO $db;
 
@@ -191,8 +197,8 @@ class AuthController
     public function insertUser(UserModel $user): int
     {
         $stmt = $this->db->prepare(
-            'INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, telephone, id_role, statut)
-             VALUES (:nom, :prenom, :email, :mdp, :tel, :role, :statut)'
+            'INSERT INTO utilisateur (nom, prenom, email, mot_de_passe, telephone, id_role, statut, email_verifie)
+             VALUES (:nom, :prenom, :email, :mdp, :tel, :role, :statut, :verifie)'
         );
         $stmt->execute([
             'nom'    => $user->getNom(),
@@ -202,6 +208,7 @@ class AuthController
             'tel'    => $user->getTelephone(),
             'role'   => $user->getIdRole(),
             'statut' => $user->getStatut(),
+            'verifie' => $user->isEmailVerifie() ? 1 : 0,
         ]);
         return (int) $this->db->lastInsertId();
     }
@@ -271,9 +278,114 @@ class AuthController
         $user->setMotDePasse(password_hash($password, PASSWORD_DEFAULT)); // hachage bcrypt + sel automatique
         $user->setIdRole((int) $this->findRoleId($role));
         $user->setStatut('actif');
-        $this->insertUser($user);
+        $user->setEmailVerifie(false);                // le compte doit d'abord être vérifié par e-mail
+        $user->setId($this->insertUser($user));
 
+        $this->issueVerificationCode($user);
+        $_SESSION['verify_email'] = $user->getEmail(); // la page de vérification sait quel compte activer
         return [];
+    }
+
+    // ==============================================================
+    // VÉRIFICATION DE L'ADRESSE E-MAIL (code à 6 chiffres)
+    // ==============================================================
+
+    /**
+     * Génère un nouveau code, l'enregistre HACHÉ en base avec sa date d'expiration,
+     * puis l'envoie par e-mail (ou l'affiche en mode démo).
+     */
+    private function issueVerificationCode(UserModel $user): void
+    {
+        $code = (string) random_int(100000, 999999);   // générateur aléatoire sûr
+        $this->db->prepare(
+            'UPDATE utilisateur
+             SET code_verification = :code, code_expiration = :exp, code_tentatives = 0
+             WHERE id_utilisateur = :id'
+        )->execute([
+            'code' => password_hash($code, PASSWORD_DEFAULT), // comme un mot de passe : jamais en clair en base
+            'exp'  => date('Y-m-d H:i:s', time() + self::CODE_MINUTES * 60),
+            'id'   => $user->getId(),
+        ]);
+        $_SESSION['code_sent_at'] = time();
+
+        if (Mailer::sendVerificationCode($user->getEmail(), $user->getPrenom(), $code, self::CODE_MINUTES)) {
+            self::flash('success', 'Un code de vérification a été envoyé à ' . $user->getEmail() . '.');
+        } elseif (!Mailer::isEnabled()) {
+            // Mode démo : aucun serveur d'e-mail configuré (config/mail.php absent)
+            self::flash('success', "Mode démo (envoi d'e-mails non configuré) : votre code est $code");
+        } else {
+            self::flash('error', "L'e-mail n'a pas pu être envoyé. Cliquez sur « Renvoyer un code ».");
+        }
+    }
+
+    /** Adresse en attente de vérification (mémorisée après l'inscription ou une connexion refusée). */
+    public static function pendingVerificationEmail(): ?string
+    {
+        return $_SESSION['verify_email'] ?? null;
+    }
+
+    /** Vérifie le code saisi. @return array erreurs (tableau vide = compte activé) */
+    public function verifyEmail(array $post): array
+    {
+        if (!self::verifyCsrfToken($post['csrf_token'] ?? null)) {
+            return ['global' => 'Jeton de sécurité invalide. Rechargez la page et réessayez.'];
+        }
+        $email = self::pendingVerificationEmail();
+        $user  = $email ? $this->findByEmail($email) : null;
+        if ($user === null) {
+            return ['global' => 'Aucune inscription en attente de vérification.'];
+        }
+        if ($user->isEmailVerifie()) {
+            unset($_SESSION['verify_email']);
+            return [];
+        }
+
+        $code = preg_replace('/\s+/', '', (string) ($post['code'] ?? ''));
+        if (!preg_match('/^\d{6}$/', $code)) {
+            return ['code' => 'Le code contient exactement 6 chiffres.'];
+        }
+        if ($user->getCodeTentatives() >= self::CODE_MAX_ATTEMPTS) {
+            return ['code' => 'Trop de codes incorrects. Demandez un nouveau code.'];
+        }
+        if ($user->getCodeExpiration() === null || strtotime($user->getCodeExpiration()) < time()) {
+            return ['code' => 'Ce code a expiré. Demandez un nouveau code.'];
+        }
+        if (!password_verify($code, (string) $user->getCodeVerification())) {
+            $this->db->prepare('UPDATE utilisateur SET code_tentatives = code_tentatives + 1 WHERE id_utilisateur = :id')
+                ->execute(['id' => $user->getId()]);
+            $left = self::CODE_MAX_ATTEMPTS - $user->getCodeTentatives() - 1;
+            return ['code' => $left > 0
+                ? "Code incorrect. Il vous reste $left essai(s)."
+                : 'Code incorrect. Demandez un nouveau code.'];
+        }
+
+        // Code correct : le compte est activé et le code est effacé (il ne peut pas resservir)
+        $this->db->prepare(
+            'UPDATE utilisateur
+             SET email_verifie = 1, code_verification = NULL, code_expiration = NULL, code_tentatives = 0
+             WHERE id_utilisateur = :id'
+        )->execute(['id' => $user->getId()]);
+        unset($_SESSION['verify_email'], $_SESSION['code_sent_at']);
+        return [];
+    }
+
+    /** Envoie un nouveau code. @return string|null message d'erreur, null si le code est parti */
+    public function resendVerificationCode(array $post): ?string
+    {
+        if (!self::verifyCsrfToken($post['csrf_token'] ?? null)) {
+            return 'Jeton de sécurité invalide.';
+        }
+        $wait = ($_SESSION['code_sent_at'] ?? 0) + self::CODE_RESEND_SECONDS - time();
+        if ($wait > 0) {
+            return "Patientez $wait seconde(s) avant de demander un nouveau code.";
+        }
+        $email = self::pendingVerificationEmail();
+        $user  = $email ? $this->findByEmail($email) : null;
+        if ($user === null || $user->isEmailVerifie()) {
+            return 'Aucune inscription en attente de vérification.';
+        }
+        $this->issueVerificationCode($user);
+        return null;
     }
 
     // ==============================================================
@@ -311,6 +423,11 @@ class AuthController
         }
         if ($user->isBloque()) {
             return ['global' => 'Ce compte est bloqué. Contactez l’administrateur.'];
+        }
+        if (!$user->isEmailVerifie()) {
+            // Bon mot de passe mais e-mail jamais confirmé : on renvoie vers la page de vérification
+            $_SESSION['verify_email'] = $user->getEmail();
+            return ['unverified' => true, 'global' => 'Votre adresse e-mail n’est pas encore vérifiée.'];
         }
 
         // Anti fixation de session : nouvel identifiant après la connexion

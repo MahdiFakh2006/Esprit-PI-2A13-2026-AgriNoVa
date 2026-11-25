@@ -73,8 +73,8 @@ switch ($action) {
         if ($isPost) {
             $errors = $authController->register($_POST);
             if (!$errors) {
-                AuthController::flash('success', 'Compte créé avec succès. Vous pouvez maintenant vous connecter.');
-                header('Location: index.php?action=login');
+                // Compte créé mais pas encore actif : direction la saisie du code reçu par e-mail
+                header('Location: index.php?action=verify');
                 exit;
             }
             $old = $_POST;
@@ -96,10 +96,49 @@ switch ($action) {
                 header('Location: index.php?action=' . AuthController::homeAction());
                 exit;
             }
+            if (!empty($errors['unverified'])) {
+                AuthController::flash('error', 'Votre adresse e-mail n’est pas encore vérifiée. Saisissez le code reçu.');
+                header('Location: index.php?action=verify');
+                exit;
+            }
             $oldEmail = (string) ($_POST['email'] ?? '');
         }
         require __DIR__ . '/views/login.php';
         break;
+
+    // ---------- Vérification de l'adresse e-mail (code à 6 chiffres) ----------
+    case 'verify':
+        if (AuthController::isAuthenticated()) {
+            header('Location: index.php?action=' . AuthController::homeAction());
+            exit;
+        }
+        $pendingEmail = AuthController::pendingVerificationEmail();
+        if ($pendingEmail === null) {
+            header('Location: index.php?action=login');
+            exit;
+        }
+        $errors = [];
+        if ($isPost) {
+            $errors = $authController->verifyEmail($_POST);
+            if (!$errors) {
+                AuthController::flash('success', 'Adresse e-mail vérifiée : votre compte est activé. Vous pouvez vous connecter.');
+                header('Location: index.php?action=login');
+                exit;
+            }
+        }
+        require __DIR__ . '/views/verify_email.php';
+        break;
+
+    // ---------- Nouveau code de vérification (POST + CSRF) ----------
+    case 'verify_resend':
+        if ($isPost) {
+            $error = $authController->resendVerificationCode($_POST);
+            if ($error) {
+                AuthController::flash('error', $error);
+            }
+        }
+        header('Location: index.php?action=verify');
+        exit;
 
     // ---------- Déconnexion (POST + CSRF : un simple lien ne peut pas déconnecter) ----------
     case 'logout':
