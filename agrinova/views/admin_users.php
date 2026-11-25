@@ -60,7 +60,7 @@ ob_start();
                             <button type="submit" class="btn btn-small"><?= $u->isBloque() ? 'Débloquer' : 'Bloquer' ?></button>
                         </form>
                         <form method="post" action="index.php?action=admin_user_delete" class="inline"
-                              data-confirm="Supprimer définitivement <?= e($u->getNomComplet()) ?> ?">
+                              data-confirm="Supprimer définitivement <?= e($u->getNomComplet()) ?> et toutes ses données (produits, réservations, inscriptions…) ?">
                             <input type="hidden" name="csrf_token" value="<?= e($csrfToken) ?>">
                             <input type="hidden" name="id" value="<?= e($u->getId()) ?>">
                             <button type="submit" class="btn btn-small btn-danger">Supprimer</button>

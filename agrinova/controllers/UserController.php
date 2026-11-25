@@ -223,16 +223,64 @@ class UserController
         if ($this->find($id) === null) {
             return 'Utilisateur introuvable.';
         }
+
+        // Transaction : soit l'utilisateur ET toutes ses données liées sont supprimés,
+        // soit rien n'est supprimé (en cas d'erreur, la base revient à son état initial).
+        $this->db->beginTransaction();
         try {
-            $this->db->prepare('DELETE FROM utilisateur WHERE id_utilisateur = :id')->execute(['id' => $id]);
+            $this->deleteWithDependencies('utilisateur', 'id_utilisateur', [$id]);
+            $this->db->commit();
         } catch (PDOException $e) {
-            // Clé étrangère : l'utilisateur possède des produits, réservations, etc.
-            if ($e->getCode() === '23000') {
-                return 'Suppression impossible : ce compte est lié à des données (produits, réservations…). Bloquez-le plutôt.';
-            }
-            throw $e;
+            $this->db->rollBack();
+            error_log('Suppression utilisateur ' . $id . ' : ' . $e->getMessage());
+            return 'La suppression a échoué, aucune donnée n’a été modifiée.';
         }
         return null;
+    }
+
+    /**
+     * Supprime les lignes de $table dont $column vaut l'une des $values,
+     * APRÈS avoir supprimé (récursivement) toutes les lignes qui les référencent
+     * par une clé étrangère : produits, réservations de ces produits, inscriptions, etc.
+     * Les tables liées sont lues dans information_schema : rien à modifier quand
+     * un nouveau module ajoute ses tables.
+     */
+    private function deleteWithDependencies(string $table, string $column, array $values, int $depth = 0): void
+    {
+        if (!$values || $depth > 10) {   // garde-fou contre une boucle de clés étrangères
+            return;
+        }
+        $in = implode(',', array_fill(0, count($values), '?'));
+
+        foreach ($this->foreignKeysTo($table) as $fk) {
+            // Valeurs de la colonne référencée pour les lignes qu'on va supprimer
+            // (ex : les id_produit des produits du vendeur supprimé)
+            $stmt = $this->db->prepare(
+                'SELECT DISTINCT `' . $fk['REFERENCED_COLUMN_NAME'] . '` FROM `' . $table . '` WHERE `' . $column . '` IN (' . $in . ')'
+            );
+            $stmt->execute($values);
+            $referenced = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            // Suppression d'abord des lignes « enfants » (ex : les réservations de ces produits)
+            $this->deleteWithDependencies($fk['TABLE_NAME'], $fk['COLUMN_NAME'], $referenced, $depth + 1);
+        }
+
+        $this->db->prepare('DELETE FROM `' . $table . '` WHERE `' . $column . '` IN (' . $in . ')')->execute($values);
+    }
+
+    /**
+     * Liste des clés étrangères qui pointent vers $table dans la base courante.
+     * Les noms de tables et de colonnes viennent de MySQL lui-même (jamais de l'utilisateur).
+     */
+    private function foreignKeysTo(string $table): array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT TABLE_NAME, COLUMN_NAME, REFERENCED_COLUMN_NAME
+             FROM information_schema.KEY_COLUMN_USAGE
+             WHERE TABLE_SCHEMA = DATABASE() AND REFERENCED_TABLE_NAME = :t'
+        );
+        $stmt->execute(['t' => $table]);
+        return $stmt->fetchAll();
     }
 
     public function toggleStatus(int $id, array $post): ?string
