@@ -169,7 +169,7 @@ views/admin_categories.php, views/admin_produits.php, views/admin_produit_form.p
 
 #### Module 3 – Diagnostic IA
 
-**Responsable :** [Mohamed MOALLAbebel](https://github.com/MedMoalla)
+**Responsable :** [Mohamed MOALLA](https://github.com/MedMoalla)
 
 **Objectif :** aider l’agriculteur à détecter tôt une maladie à partir de la photo d’une feuille, et lui proposer un traitement.
 Le résultat est indicatif et ne remplace pas l’avis d’un agronome.
