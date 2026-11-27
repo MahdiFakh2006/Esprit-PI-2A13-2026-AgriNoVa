@@ -7,6 +7,9 @@ Thumbs.db
 # Fichiers déposés par les utilisateurs (images de produits, analyses IA…)
 uploads/*
 !uploads/.gitkeep
+!uploads/analyses/
+uploads/analyses/*
+!uploads/analyses/.htaccess
 
 # Journaux
 *.log

@@ -1,0 +1,46 @@
+/* assets/css/diagnostic.css — Module 3 : Diagnostic IA */
+.diag-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2em; align-items: start; }
+.diag-preview[hidden] { display: none; }
+.diag-images { display: grid; grid-template-columns: 1fr 1fr; gap: .8em; }
+.diag-images figure { margin: 0; }
+.diag-images img, .diag-images canvas { width: 100%; height: auto; border-radius: 10px; border: 2px solid var(--line); display: block; }
+.diag-images figcaption { font-size: .8rem; color: var(--muted); text-align: center; margin-top: .2em; }
+
+.diag-result { display: grid; grid-template-columns: minmax(220px, 1fr) 2fr; gap: 1.6em; align-items: start; }
+.diag-result-photo img { width: 100%; border-radius: var(--radius); border: 2px solid var(--ink); }
+.diag-result-text h1 { margin: .2em 0 .3em; }
+.diag-result-text h3 { margin: 1em 0 .2em; font-size: 1rem; }
+.diag-meter { display: grid; grid-template-columns: auto 1fr auto; gap: .6em; align-items: center; margin: 1.2em 0; }
+
+.diag-ok   { background: var(--mint-soft); border-color: var(--green); color: var(--green); }
+.diag-warn { background: #FFF1D6; border-color: #B7791F; color: #8A5A00; }
+.diag-bad  { background: var(--red-soft); border-color: var(--red); color: var(--red); }
+.diag-fill-ok   { background: var(--green); }
+.diag-fill-warn { background: #E67E22; }
+.diag-fill-bad  { background: var(--red); }
+.diag-low { color: var(--red); font-weight: 700; }
+
+.diag-grav-faible  { background: var(--mint-soft); }
+.diag-grav-moyenne { background: #FFF1D6; }
+.diag-grav-elevee  { background: var(--red-soft); }
+.diag-dot { display: inline-block; width: .8em; height: .8em; border-radius: 50%; margin-right: .4em; border: 1px solid var(--ink); vertical-align: middle; }
+.diag-dot-jaune { background: #F1C40F; }
+.diag-dot-brun  { background: #8E4B2A; }
+.diag-dot-blanc { background: #FFFFFF; }
+.diag-dot-noir  { background: #222222; }
+
+.diag-thumb { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+
+.m3-tabs { display: flex; gap: .5em; margin-bottom: 1em; }
+.m3-tabs a { padding: .4em 1em; border: 2px solid var(--ink); border-radius: 999px; text-decoration: none; color: var(--ink); font-weight: 600; }
+.m3-tabs a.active { background: var(--mint); }
+
+.card-link { display: block; text-decoration: none; color: inherit; transition: transform .1s, box-shadow .1s; }
+.card-link:hover { transform: translateY(-2px); box-shadow: 0 4px 0 var(--ink); }
+.card-link small { color: var(--green); font-weight: 700; }
+
+@media (max-width: 800px) { .diag-grid, .diag-result { grid-template-columns: 1fr; } }
+
+/* Aperçu : colonne des pourcentages plus large (« 100 %» sur une ligne) */
+#diag-barres .bar-row { grid-template-columns: 120px 1fr 56px; }
+#diag-barres .bar-value { white-space: nowrap; }

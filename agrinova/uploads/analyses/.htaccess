@@ -1,0 +1,5 @@
+# Les photos envoyées ne doivent JAMAIS être exécutées comme du code
+<FilesMatch "\.(php|phtml|phar|php\d)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes

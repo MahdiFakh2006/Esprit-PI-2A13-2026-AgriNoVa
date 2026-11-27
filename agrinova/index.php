@@ -42,9 +42,13 @@ header('Cache-Control: no-store');                                 // pages prot
 require_once __DIR__ . '/config/helpers.php';
 require_once __DIR__ . '/controllers/AuthController.php';
 require_once __DIR__ . '/controllers/UserController.php';
+require_once __DIR__ . '/controllers/MaladieController.php';
+require_once __DIR__ . '/controllers/AnalyseController.php';
 
 $authController = new AuthController();
 $userController = new UserController($authController);
+$maladieController = new MaladieController();
+$analyseController = new AnalyseController($maladieController);
 $authController->syncSession(); // rôle et statut relus en base à chaque requête
 
 $isPost = $_SERVER['REQUEST_METHOD'] === 'POST';
@@ -258,6 +262,126 @@ switch ($action) {
             : $userController->toggleStatus($id, $_POST);
         AuthController::flash($error ? 'error' : 'success', $error ?? ($action === 'admin_user_delete' ? 'Utilisateur supprimé.' : 'Statut du compte modifié.'));
         header('Location: index.php?action=admin_users');
+        exit;
+
+    // ==============================================================
+    // MODULE 3 — DIAGNOSTIC IA (Maladie 1 — N Analyse)
+    // ==============================================================
+
+    // ---------- FRONT OFFICE : envoyer la photo d'une feuille ----------
+    case 'diagnostic':
+        AuthController::requireRole('agriculteur');
+        $errors = [];
+        $old = [];
+        if ($isPost) {
+            [$errors, $newId] = $analyseController->create(AuthController::currentUserId(), $_POST, $_FILES);
+            if (!$errors) {
+                header('Location: index.php?action=analyse_resultat&id=' . $newId);
+                exit;
+            }
+            $old = $_POST;
+        }
+        $cultures = $maladieController->cultures();
+        require __DIR__ . '/views/diagnostic.php';
+        break;
+
+    case 'analyse_resultat':
+        AuthController::requireRole('agriculteur');
+        $analyse = $analyseController->findForOwner((int) ($_GET['id'] ?? 0), AuthController::currentUserId());
+        if ($analyse === null) {
+            AuthController::flash('error', 'Analyse introuvable.');
+            header('Location: index.php?action=mes_analyses');
+            exit;
+        }
+        $maladie = $analyse->getIdMaladie() ? $maladieController->find($analyse->getIdMaladie()) : null;
+        require __DIR__ . '/views/resultat_analyse.php';
+        break;
+
+    case 'mes_analyses':
+        AuthController::requireRole('agriculteur');
+        $analyses = $analyseController->mesAnalyses(AuthController::currentUserId());
+        require __DIR__ . '/views/mes_analyses.php';
+        break;
+
+    case 'analyse_supprimer':
+        AuthController::requireRole('agriculteur');
+        if ($isPost) {
+            $error = $analyseController->delete((int) ($_POST['id'] ?? 0), $_POST, AuthController::currentUserId());
+            AuthController::flash($error ? 'error' : 'success', $error ?? 'Analyse supprimée.');
+        }
+        header('Location: index.php?action=mes_analyses');
+        exit;
+
+    // ---------- BACK OFFICE : maladies (CRUD) ----------
+    case 'admin_maladies':
+        AuthController::requireRole('admin');
+        $result = $maladieController->search($_GET);
+        $cultures = $maladieController->cultures();
+        require __DIR__ . '/views/admin_maladies.php';
+        break;
+
+    case 'admin_maladie_create':
+    case 'admin_maladie_edit':
+        AuthController::requireRole('admin');
+        $editMaladie = null;
+        if ($action === 'admin_maladie_edit') {
+            $editMaladie = $maladieController->find((int) ($_GET['id'] ?? 0));
+            if ($editMaladie === null) {
+                AuthController::flash('error', 'Maladie introuvable.');
+                header('Location: index.php?action=admin_maladies');
+                exit;
+            }
+        }
+        $errors = [];
+        $old = $editMaladie ? [
+            'nom' => $editMaladie->getNom(), 'culture' => $editMaladie->getCulture(),
+            'symptomes' => $editMaladie->getSymptomes(), 'traitement' => $editMaladie->getTraitement(),
+            'couleur_symptome' => (string) $editMaladie->getCouleurSymptome(), 'gravite' => $editMaladie->getGravite(),
+        ] : ['gravite' => 'moyenne'];
+        if ($isPost) {
+            $errors = $editMaladie
+                ? $maladieController->update($editMaladie->getId(), $_POST)
+                : $maladieController->create($_POST);
+            if (!$errors) {
+                AuthController::flash('success', $editMaladie ? 'Maladie modifiée.' : 'Maladie ajoutée.');
+                header('Location: index.php?action=admin_maladies');
+                exit;
+            }
+            $old = $_POST;
+        }
+        $cultures = $maladieController->cultures();
+        require __DIR__ . '/views/admin_maladie_form.php';
+        break;
+
+    case 'admin_maladie_delete':
+        AuthController::requireRole('admin');
+        if (!$isPost) {
+            http_response_code(405);
+            exit('Méthode non autorisée.');
+        }
+        $error = $maladieController->delete((int) ($_POST['id'] ?? 0), $_POST);
+        AuthController::flash($error ? 'error' : 'success', $error ?? 'Maladie supprimée.');
+        header('Location: index.php?action=admin_maladies');
+        exit;
+
+    // ---------- BACK OFFICE : analyses et statistiques ----------
+    case 'admin_analyses':
+        AuthController::requireRole('admin');
+        $result = $analyseController->search($_GET);
+        $stats = $analyseController->stats();
+        $cultures = $maladieController->cultures();
+        require __DIR__ . '/views/admin_analyses.php';
+        break;
+
+    case 'admin_analyse_delete':
+        AuthController::requireRole('admin');
+        if (!$isPost) {
+            http_response_code(405);
+            exit('Méthode non autorisée.');
+        }
+        $error = $analyseController->delete((int) ($_POST['id'] ?? 0), $_POST);
+        AuthController::flash($error ? 'error' : 'success', $error ?? 'Analyse supprimée.');
+        header('Location: index.php?action=admin_analyses');
         exit;
 
     default:

@@ -35,13 +35,28 @@ ob_start();
 </section>
 
 <section class="cards">
+    <?php
+    // Modules déjà intégrés : libellé de la carte => action (chaque membre ajoute la sienne)
+    $liens = [
+        'Diagnostic IA' => 'index.php?action=diagnostic',
+    ];
+    ?>
     <?php foreach ($shortcuts as [$code, $label, $desc]): ?>
-        <article class="card card-soon">
-            <span class="card-code"><?= e($code) ?></span>
-            <h3><?= e($label) ?></h3>
-            <p><?= e($desc) ?></p>
-            <small>Bientôt disponible</small>
-        </article>
+        <?php if (isset($liens[$label])): ?>
+            <a class="card card-link" href="<?= e($liens[$label]) ?>">
+                <span class="card-code"><?= e($code) ?></span>
+                <h3><?= e($label) ?></h3>
+                <p><?= e($desc) ?></p>
+                <small>Ouvrir →</small>
+            </a>
+        <?php else: ?>
+            <article class="card card-soon">
+                <span class="card-code"><?= e($code) ?></span>
+                <h3><?= e($label) ?></h3>
+                <p><?= e($desc) ?></p>
+                <small>Bientôt disponible</small>
+            </article>
+        <?php endif; ?>
     <?php endforeach; ?>
 </section>
 

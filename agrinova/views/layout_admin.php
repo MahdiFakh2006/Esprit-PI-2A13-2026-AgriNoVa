@@ -7,7 +7,7 @@ $flashes = AuthController::takeFlashes();
 $active = $active ?? '';
 // Menus des autres modules : chaque membre remplace « # » par son action quand son module est intégré
 $modules = [
-    ['M2', 'Produits', '#'], ['M3', 'Analyses IA', '#'], ['M4', 'Locations', '#'],
+    ['M2', 'Produits', '#'], ['M3', 'Diagnostic IA', 'index.php?action=admin_maladies'], ['M4', 'Locations', '#'],
     ['M5', 'Réclamations', '#'], ['M6', 'Formations', '#'], ['M7', 'Parrainages', '#'],
 ];
 ?>
